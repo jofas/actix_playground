@@ -1,10 +1,9 @@
 {
   "build": {
-    "beforeDevCommand": "",
-    "beforeBuildCommand": "",
-    "devPath": "../src",
-    "distDir": "../src",
-    "withGlobalTauri": true
+    "beforeBuildCommand": "cd frontend && npm run build && npm run export",
+    "beforeDevCommand": "cd frontend && npm run dev",
+    "devPath": "http://localhost:3000",
+    "distDir": "frontend/out"
   },
   "package": {
     "productName": "tauri",
