@@ -24,4 +24,13 @@ repository:
 cargo tauri dev
 ```
 
+### Tests
+
+Backend tests are run from the root directory of this repository with
+the following command:
+
+```bash
+cargo test --manifest-path=src/Cargo.toml -- --test-threads=1
+```
+
 [prerequisites]: https://tauri.app/v1/guides/getting-started/prerequisites
