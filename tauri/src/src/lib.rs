@@ -1,5 +1,7 @@
 use anyhow::anyhow;
 
+use sqlx::sqlite::SqlitePoolOptions;
+
 use std::env;
 use std::ffi::OsString;
 use std::fs;
@@ -13,6 +15,7 @@ impl ProjectsDir {
   }
 }
 
+#[derive(sqlx::FromRow)]
 struct Entry {
   id: u32,
   title: String,
@@ -25,7 +28,7 @@ fn greet(name: &str) -> String {
   format!("Hello {}!", name)
 }
 
-fn create_project(
+async fn create_project(
   name: OsString,
   dir: &ProjectsDir,
 ) -> anyhow::Result<()> {
@@ -33,11 +36,37 @@ fn create_project(
   file_name.push(name);
   file_name.push(".db");
 
-  fs::File::options()
-    .read(true)
-    .write(true)
-    .create_new(true)
-    .open(file_name)?;
+  // File must be created first, so that the pool can connect.
+  //
+  // Also, this call fails if the project already exists, making sure
+  // we don't accidentally override an existing project.
+  //
+  {
+    fs::File::options()
+      .read(true)
+      .write(true)
+      .create_new(true)
+      .open(&file_name)?;
+  }
+
+  let mut db = OsString::from("sqlite:");
+  db.push(&file_name);
+
+  let pool = SqlitePoolOptions::new()
+    .max_connections(1)
+    .connect(db.to_str().ok_or(anyhow!("path to db is faulty"))?)
+    .await?;
+
+  // TODO: add all the tables (entries)
+
+  let setup = "
+    CREATE TABLE entries (
+      id INTEGER PRIMARY KEY NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      published NOT NULL
+    );
+  ";
 
   Ok(())
 }
@@ -92,8 +121,27 @@ mod tests {
     create_project, delete_project, greet, list_projects, ProjectsDir,
   };
 
-  #[test]
-  fn test_list_projects() {
+  #[tokio::test]
+  async fn test_duplicated_project() {
+    dotenv::dotenv().unwrap();
+
+    let pd = ProjectsDir::from_env().unwrap();
+
+    create_project("test dublicated".into(), &pd).await.unwrap();
+
+    // second call should fail, because project already exists
+
+    assert!(create_project("test dublicated".into(), &pd)
+      .await
+      .is_err());
+
+    // clean up projects after test
+
+    delete_project("test dublicated".into(), &pd).unwrap();
+  }
+
+  #[tokio::test]
+  async fn test_list_projects() {
     dotenv::dotenv().unwrap();
 
     let pd = ProjectsDir::from_env().unwrap();
@@ -102,7 +150,7 @@ mod tests {
 
     // add a project
 
-    create_project("test 1".into(), &pd).unwrap();
+    create_project("test 1".into(), &pd).await.unwrap();
 
     assert_eq!(
       list_projects(&pd).unwrap(),
