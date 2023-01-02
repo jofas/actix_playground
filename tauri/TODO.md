@@ -4,8 +4,18 @@
 
 * [x] dev documentation in readme
 
-* [ ] create project
+* [ ] project + entry types 
 
-* [ ] delete project
+* [ ] data layer: 
 
-* [ ] list projects
+  - [ ] create project (sqlite db on disk)
+
+  - [ ] delete project  
+
+  - [ ] insert entry into project
+
+  - [ ] delete entry from project
+
+  - [ ] read entries from project
+
+* [ ] graphql interface
