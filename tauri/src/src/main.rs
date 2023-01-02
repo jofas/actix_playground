@@ -3,14 +3,32 @@
   windows_subsystem = "windows"
 )]
 
+use std::env;
+
+struct ProjectsDir(String);
+
 #[tauri::command]
 fn greet(name: &str) -> String {
-  format!("Hello, {}! You've been greeted from Rust!", name)
+  format!("Hello {}!", name)
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
+  dotenv::dotenv()?;
+
   tauri::Builder::default()
+    .manage(ProjectsDir(env::var("PROJECTS_DIR")?))
     .invoke_handler(tauri::generate_handler![greet])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    .run(tauri::generate_context!())?;
+
+  Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::greet;
+
+  #[test]
+  fn test_greet() {
+    assert_eq!(greet("World"), "Hello World!".to_owned());
+  }
 }

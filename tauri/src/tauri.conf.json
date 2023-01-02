@@ -3,7 +3,7 @@
     "beforeBuildCommand": "cd frontend && npm run build && npm run export",
     "beforeDevCommand": "cd frontend && npm run dev",
     "devPath": "http://localhost:3000",
-    "distDir": "frontend/out"
+    "distDir": "http://localhost:3000"
   },
   "package": {
     "productName": "tauri",
