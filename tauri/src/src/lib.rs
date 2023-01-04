@@ -67,7 +67,7 @@ impl ProjectsDir {
 //
 // * Projects
 // * Project (db connection)
-// * ProjectCache
+// * ProjectCache (Map<String, Project>, shared)
 //
 // GQL api:
 //
@@ -75,7 +75,6 @@ impl ProjectsDir {
 // * Mutation
 //
 // GQL api needs access to data access layer
-// (Projects, Project and ProjectCache)
 //
 
 #[derive(sqlx::FromRow, SimpleObject, InputObject)]
