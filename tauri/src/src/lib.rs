@@ -1,7 +1,8 @@
 use anyhow::anyhow;
 
 use async_graphql::{
-  EmptySubscription, Object, Request, Response, Schema, ServerError,
+  EmptySubscription, InputObject, Object, Request, Response, Schema,
+  ServerError, SimpleObject,
 };
 
 use sqlx::sqlite::SqlitePoolOptions;
@@ -15,8 +16,12 @@ struct Query;
 
 #[Object]
 impl Query {
-  async fn greet(&self, name: String) -> String {
-    format!("Hello {}!", name)
+  async fn projects(&self) -> Vec<String> {
+    todo!()
+  }
+
+  async fn entries(&self, project: String) -> Vec<Entry> {
+    todo!()
   }
 }
 
@@ -24,8 +29,24 @@ struct Mutation;
 
 #[Object]
 impl Mutation {
-  async fn greet_mut(&self, name: String) -> String {
-    format!("Hello {}!", name)
+  async fn create_project(&self, project: String) -> bool {
+    todo!()
+  }
+
+  async fn delete_project(&self, project: String) -> bool {
+    todo!()
+  }
+
+  async fn create_entry(
+    &self,
+    project: String,
+    entry: Entry,
+  ) -> bool {
+    todo!()
+  }
+
+  async fn delete_entry(&self, project: String, id: u32) -> bool {
+    todo!()
   }
 }
 
@@ -45,7 +66,7 @@ impl ProjectsDir {
 // GQL Query
 // GQL Mutations
 
-#[derive(sqlx::FromRow)]
+#[derive(sqlx::FromRow, SimpleObject, InputObject)]
 struct Entry {
   id: u32,
   title: String,
