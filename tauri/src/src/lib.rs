@@ -23,6 +23,10 @@ impl Query {
   async fn entries(&self, project: String) -> Vec<Entry> {
     todo!()
   }
+
+  async fn entry(&self, project: String, id: u32) -> Option<Entry> {
+    todo!()
+  }
 }
 
 struct Mutation;
@@ -72,14 +76,6 @@ struct Entry {
   title: String,
   body: String,
   published: bool,
-}
-
-#[tauri::command]
-async fn graphql(
-  query: Request,
-  schema: State<'_, Schema<Query, Mutation, EmptySubscription>>,
-) -> Result<Response, Vec<ServerError>> {
-  schema.execute(query).await.into_result()
 }
 
 async fn create_project(
@@ -168,6 +164,14 @@ async fn delete_entry() -> anyhow::Result<()> {
 async fn list_entries() -> anyhow::Result<()> {
   // here access cached connection pool to project
   todo!()
+}
+
+#[tauri::command]
+async fn graphql(
+  query: Request,
+  schema: State<'_, Schema<Query, Mutation, EmptySubscription>>,
+) -> Result<Response, Vec<ServerError>> {
+  schema.execute(query).await.into_result()
 }
 
 pub fn app() -> anyhow::Result<tauri::App<tauri::Wry>> {
