@@ -29,9 +29,9 @@
 
   - [x] read entries from project
 
-* [ ] proper state management
+* [x] proper state management
 
-  - [ ] cache db connections
+  - [x] cache db connections
 
 * [ ] graphql interface
 
