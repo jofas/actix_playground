@@ -34,8 +34,8 @@
   - [x] cache db connections
 
 * [ ] graphql interface
-  
-  - [ ] error type  
+
+  - [ ] error type replacing anyhow  
  
   - [ ] implement endpoints
 
