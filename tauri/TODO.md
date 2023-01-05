@@ -34,6 +34,10 @@
   - [x] cache db connections
 
 * [ ] graphql interface
+  
+  - [ ] implement endpoints
+
+  - [ ] test  
 
 * [ ] secure tauri (isolation, csp, ...)
 
