@@ -41,15 +41,29 @@ impl Query {
 #[Object]
 impl Query {
   async fn projects(&self) -> Vec<String> {
-    todo!()
+    self.dal.projects().unwrap()
   }
 
   async fn entries(&self, project: String) -> Vec<Entry> {
-    todo!()
+    self
+      .dal
+      .project(&project)
+      .await
+      .unwrap()
+      .entries()
+      .await
+      .unwrap()
   }
 
-  async fn entry(&self, project: String, id: u32) -> Option<Entry> {
-    todo!()
+  async fn entry(&self, project: String, id: u32) -> Entry {
+    self
+      .dal
+      .project(&project)
+      .await
+      .unwrap()
+      .entry(id)
+      .await
+      .unwrap()
   }
 }
 
@@ -66,22 +80,38 @@ impl Mutation {
 #[Object]
 impl Mutation {
   async fn create_project(&self, project: String) -> bool {
-    todo!()
+    self.dal.create_project(&project).await.unwrap();
+    true
   }
 
   async fn delete_project(&self, project: String) -> bool {
-    todo!()
+    self.dal.delete_project(&project).unwrap();
+    true
   }
 
-  async fn create_entry(
-    &self,
-    project: String,
-    entry: Entry,
-  ) -> bool {
-    todo!()
+  async fn create_entry(&self, project: String, e: Entry) -> bool {
+    self
+      .dal
+      .project(&project)
+      .await
+      .unwrap()
+      .create_entry(e)
+      .await
+      .unwrap();
+
+    true
   }
 
   async fn delete_entry(&self, project: String, id: u32) -> bool {
-    todo!()
+    self
+      .dal
+      .project(&project)
+      .await
+      .unwrap()
+      .delete_entry(id)
+      .await
+      .unwrap();
+
+    true
   }
 }

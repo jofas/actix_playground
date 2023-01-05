@@ -27,7 +27,7 @@ impl DAL {
     }
   }
 
-  async fn create_project<P: AsRef<Path>>(
+  pub async fn create_project<P: AsRef<Path>>(
     &self,
     project: P,
   ) -> anyhow::Result<Project> {
@@ -53,14 +53,14 @@ impl DAL {
     Ok(p)
   }
 
-  fn delete_project<P: AsRef<Path>>(
+  pub fn delete_project<P: AsRef<Path>>(
     &self,
     project: P,
   ) -> anyhow::Result<()> {
     Ok(fs::remove_file(self.project_path(project))?)
   }
 
-  fn list_projects(&self) -> anyhow::Result<Vec<String>> {
+  pub fn projects(&self) -> anyhow::Result<Vec<String>> {
     let mut projects = Vec::new();
 
     for entry in fs::read_dir(&self.path)? {
@@ -72,7 +72,7 @@ impl DAL {
     Ok(projects)
   }
 
-  async fn project<P: AsRef<Path>>(
+  pub async fn project<P: AsRef<Path>>(
     &self,
     project: P,
   ) -> anyhow::Result<Project> {
@@ -114,7 +114,7 @@ impl DAL {
 /// pool state.
 ///
 #[derive(Clone)]
-struct Project {
+pub struct Project {
   pool: SqlitePool,
 }
 
@@ -153,7 +153,7 @@ impl Project {
     Ok(())
   }
 
-  async fn insert_entry(&self, e: Entry) -> anyhow::Result<u32> {
+  pub async fn create_entry(&self, e: Entry) -> anyhow::Result<u32> {
     let id = sqlx::query(
       "INSERT INTO entries (title, body, published) VALUES (?, ?, ?);",
     )
@@ -167,7 +167,7 @@ impl Project {
     Ok(id.try_into()?)
   }
 
-  async fn delete_entry(&self, id: u32) -> anyhow::Result<()> {
+  pub async fn delete_entry(&self, id: u32) -> anyhow::Result<()> {
     sqlx::query("DELETE FROM entries WHERE id = ?")
       .bind(id)
       .execute(&self.pool)
@@ -176,10 +176,17 @@ impl Project {
     Ok(())
   }
 
-  async fn list_entries(&self) -> Result<Vec<Entry>, sqlx::Error> {
+  pub async fn entries(&self) -> Result<Vec<Entry>, sqlx::Error> {
     sqlx::query_as::<_, Entry>("SELECT * FROM entries;")
       .fetch(&self.pool)
       .try_collect()
+      .await
+  }
+
+  pub async fn entry(&self, id: u32) -> Result<Entry, sqlx::Error> {
+    sqlx::query_as::<_, Entry>("SELECT * FROM entries WHERE id = ?;")
+      .bind(id)
+      .fetch_one(&self.pool)
       .await
   }
 }
@@ -193,29 +200,26 @@ mod tests {
   use super::DAL;
 
   #[tokio::test]
-  async fn test_list_projects() {
+  async fn test_projects() {
     dotenv::dotenv().unwrap();
 
     let dir = env::var("PROJECTS_DIR").unwrap();
 
     let dal = DAL::new(dir);
 
-    assert_eq!(dal.list_projects().unwrap(), Vec::<String>::new());
+    assert_eq!(dal.projects().unwrap(), Vec::<String>::new());
 
     // add a project
 
     dal.create_project("test 1").await.unwrap();
 
-    assert_eq!(
-      dal.list_projects().unwrap(),
-      vec!["test 1".to_owned()],
-    );
+    assert_eq!(dal.projects().unwrap(), vec!["test 1".to_owned()],);
 
     // delete project
 
     dal.delete_project("test 1").unwrap();
 
-    assert_eq!(dal.list_projects().unwrap(), Vec::<String>::new());
+    assert_eq!(dal.projects().unwrap(), Vec::<String>::new());
   }
 
   #[tokio::test]
@@ -251,7 +255,7 @@ mod tests {
 
     let p = dal.project(project).await.unwrap();
 
-    assert_eq!(p.list_entries().await.unwrap(), vec![]);
+    assert_eq!(p.entries().await.unwrap(), vec![]);
 
     let e = Entry {
       id: None,
@@ -260,7 +264,7 @@ mod tests {
       published: false,
     };
 
-    assert_eq!(p.insert_entry(e).await.unwrap(), 1);
+    assert_eq!(p.create_entry(e).await.unwrap(), 1);
 
     let e_expected = Entry {
       id: Some(1),
@@ -269,11 +273,11 @@ mod tests {
       published: false,
     };
 
-    assert_eq!(p.list_entries().await.unwrap(), vec![e_expected]);
+    assert_eq!(p.entries().await.unwrap(), vec![e_expected]);
 
     p.delete_entry(1).await.unwrap();
 
-    assert_eq!(p.list_entries().await.unwrap(), vec![]);
+    assert_eq!(p.entries().await.unwrap(), vec![]);
 
     dal.delete_project(project).unwrap();
   }
