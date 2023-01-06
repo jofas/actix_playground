@@ -33,13 +33,13 @@
 
   - [x] cache db connections
 
-* [ ] graphql interface
+* [x] graphql interface
 
   - [x] error handling
  
   - [x] implement endpoints
 
-  - [ ] test  
+  - [x] test  
 
 * [ ] secure tauri (isolation, csp, ...)
 
