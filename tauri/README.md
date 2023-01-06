@@ -33,4 +33,14 @@ the following command:
 cargo test --manifest-path=src/Cargo.toml -- --test-threads=1
 ```
 
+### Export GraphQL SDL to the Frontend 
+
+1. Export `SDL` from the backend:
+
+   ```bash
+   cargo run --bin export_sdl --manifest-path=src/Cargo.toml > sdl.txt
+   ```
+
+   This will create the `sdl.txt` file with the schema definition.
+
 [prerequisites]: https://tauri.app/v1/guides/getting-started/prerequisites
