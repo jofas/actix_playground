@@ -45,6 +45,8 @@
 
 * [ ] basic frontend
 
+* [ ] cli command for exporting SDL
+
 * [ ] bundling
 
 * [ ] update mechanism
